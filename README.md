@@ -15,7 +15,9 @@
 ## Resources
 - [Git Tutorials](https://www.atlassian.com/git/tutorials)
 - [Try Git](https://try.github.io/)
+- [HTML W3Schools](https://www.w3schools.com/html/default.asp)
 - [HTML Tutorial](https://www.codecademy.com/learn/learn-html)
+- [CSS W3Schools](https://www.w3schools.com/css/)
 - [CSS Tutorial](https://www.codecademy.com/learn/learn-css)
 - [CSS Diner](https://flukeout.github.io/)
 - [Interactive Websites with Javascript Tutorial](https://www.codecademy.com/learn/build-interactive-websites)
