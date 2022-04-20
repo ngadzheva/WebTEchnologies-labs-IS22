@@ -9,6 +9,8 @@
 - How to install NodeJs and npm 
   - Install NodeJs on Linux/Ubuntu: https://linuxize.com/post/how-to-install-node-js-on-ubuntu-20-04/
   - Install NodeJs on Windows: https://nodejs.org/en/
+ - How to setup Express
+  - ExpressJs documentation: https://expressjs.com/en/starter/installing.html
 **_Note:_** NPM comes with NodeJs
 
 
@@ -29,6 +31,11 @@
 - [You don't Know JavaScript](https://github.com/getify/You-Dont-Know-JS/blob/2nd-ed/get-started/README.md)
 - [Eloquent JavaScript](https://github.com/amilajack/reading/blob/master/JavaScript/Eloquent%20JavaScript.pdf)
 - [Learn Asynchronous JavaScript](https://www.codecademy.com/learn/asynchronous-javascript)
+- [Create a back-end app with JavaScript Tutorial](https://www.codecademy.com/learn/paths/create-a-back-end-app-with-javascript)
+- [Learn NodeJs Tutorial](https://www.codecademy.com/learn/learn-node-js)
+- [Learn Express Tutorial](https://www.codecademy.com/learn/learn-express)
+- [NodeJs Documentation](https://nodejs.org/en/docs/)
+- [Express Guide](https://expressjs.com/en/guide/routing.html)
 
 ## Course Project
 ### Iterations
