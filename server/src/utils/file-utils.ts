@@ -1,9 +1,9 @@
-const fs = require ('fs');
+import * as fs from 'fs';
 
-const read = (filename) => {
+export const read = (filename: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     fs.readFile(filename, (error, data) => {
-      let result;
+      let result: string;
 
       if (error) {
         result = 'Error reading file';
@@ -11,16 +11,16 @@ const read = (filename) => {
         return;
       }
 
-      result = data.toString();
+      result = data ? data.toString() : '';
       resolve(result);
     });
   });
 };
 
-const write = (filename, data) => {
+export const write = (filename: string, data: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     fs.writeFile(filename, data, (error) => {
-      let result;
+      let result: string;
 
       if (error) {
         result = 'Error writing file';
@@ -34,4 +34,8 @@ const write = (filename, data) => {
   });
 };
 
-module.exports = { read, write };
+
+// {
+//   read: read,
+//   write: write
+// }

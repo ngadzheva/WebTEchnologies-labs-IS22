@@ -1,5 +1,5 @@
-const express = require('express');
-const { students } = require('./routes/students');
+import * as express from 'express';
+import students from './routes/students';
 
 const app = express();
 
@@ -18,5 +18,6 @@ app.use(express.json());
 // });
 
 app.use('/students', students);
+// app.use('/users', users);
 
 app.listen(3001, () => console.log('Server is listening on port 3001'));
