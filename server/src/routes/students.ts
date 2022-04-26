@@ -29,7 +29,7 @@ students.get('/:fn', (req: Request, res: Response) => {
 
     read(filePath)
         .then(students => JSON.parse(students))
-        .then(studentsData => studentsData.students.filter(student => student.fn === Number(fn)))
+        .then(studentsData => studentsData.students.filter((student: Student) => student.fn === Number(fn)))
         .then((student: Student[]) => res.status(200).json(student[0]))
         .catch(error => res.status(500).json({ error: 'Internal server error' }));
 })
