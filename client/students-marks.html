@@ -7,6 +7,12 @@
         <title>Students</title>
 
         <link rel='stylesheet' href='styles/styles.css' type='text/css' />
+        
+        <script defer src="scripts/config/server-config.js"></script>
+        <script defer src="scripts/utils/error-utils.js"></script>
+        <script defer src="scripts/utils/fetch-utils.js"></script>
+        <script defer src="scripts/services/students-service.js"></script>
+        <script defer src="scripts/utils/students-utils.js"></script>
         <script defer src="scripts/students.js"></script>
     </head>
 
@@ -45,6 +51,7 @@
                 <fieldset>
                     <legend>Add Student's Mark</legend>
                     <form class='student'>
+                        <label id='message'></label>
                         <label for='first-name'>First Name</label>    
                         <input type='text' name='first-name'/>
                         <label for='last-name'>Last Name</label>    
