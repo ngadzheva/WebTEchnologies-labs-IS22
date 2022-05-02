@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-export const read = (filename: string): Promise<string> => {
+const read = (filename: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     fs.readFile(filename, (error, data) => {
       let result: string;
@@ -17,7 +17,11 @@ export const read = (filename: string): Promise<string> => {
   });
 };
 
-export const write = (filename: string, data: string): Promise<string> => {
+export const readFile = async (filename: string): Promise<string> => {
+  return await read(filename);
+}
+
+const write = (filename: string, data: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     fs.writeFile(filename, data, (error) => {
       let result: string;
@@ -33,6 +37,10 @@ export const write = (filename: string, data: string): Promise<string> => {
     });
   });
 };
+
+export const writeFile = async (filename: string, data: string): Promise<void> => {
+  await write(filename, data);
+}
 
 
 // {

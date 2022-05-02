@@ -1,25 +1,43 @@
-import { Router, Request, Response } from 'express'; 
-import { read, write } from '../utils/file-utils';
-
-const filePath: string = './resources/students.json';
+import { Router, Request, Response } from 'express';
+import StudentsController from '../controllers/students-controller';
+import { IStudent } from '../interfaces/student';
 
 const students: Router = Router();
 
-interface Student {
-    firstName: string;
-    lastName: string;
-    fn: number;
-    mark: number;
-};
+let studentsController: StudentsController;
 
-interface StudentsData {
-    students: Array<Student>;
+const getStudentsController = (req: Request, res: Response, next: () => void) => {
+    try {
+        studentsController = new StudentsController();
+
+        next();
+    } catch(error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 }
 
+const saveStudentData = async (res: Response, message: string): Promise<void> => {
+    try {
+        await studentsController.writeStudentsData();
+
+        res.status(200).json(message);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error'})
+    }
+}
+
+students.use(getStudentsController);
+
 students.get('/', (req: Request, res: Response) => {
-   read(filePath)
-    .then(students => res.status(200).json(JSON.parse(students)))
-    .catch(error => res.status(500).json({ error: 'Internal server error' }));
+    const students = studentsController.getStudentsData();
+
+    if (students) {
+        res.status(200).json(students);
+    } else {
+        res.status(404).json({ error: 'No students found' });
+    }
 });
 
 students.get('/:fn', (req: Request, res: Response) => {
@@ -27,11 +45,13 @@ students.get('/:fn', (req: Request, res: Response) => {
     // { fn: 77777, name: value }
     // const asdf: { [key: string]: number | string };
 
-    read(filePath)
-        .then(students => JSON.parse(students))
-        .then(studentsData => studentsData.students.filter((student: Student) => student.fn === Number(fn)))
-        .then((student: Student[]) => res.status(200).json(student[0]))
-        .catch(error => res.status(500).json({ error: 'Internal server error' }));
+    const student = studentsController.findStudentByFn(Number(fn));
+
+    if (student) {
+        res.status(200).json(student[0]);
+    } else {
+        res.status(404).json({ error: 'Student not found' });
+    }
 })
 
 students.post('/', async (req: Request, res: Response) => {
@@ -42,110 +62,43 @@ students.post('/', async (req: Request, res: Response) => {
     //     mark: ...
     //     age: ...
     // }
-    const student: Student = req.body;
+    const student: IStudent = req.body;
 
-    read(filePath)
-        .then(students => JSON.parse(students))
-        .then((studentsData: StudentsData) => {
-            studentsData.students.push(student);
-            return studentsData;
-        })
-        .then(newStudents => {
-            console.log(newStudents);
-            write(filePath, JSON.stringify(newStudents));
-        })
-        .then(() => res.status(200).json('Student added successfully'))
-        .catch(error => {
-            console.log(error);
-            res.status(500).json({ error: 'Internal server error'})
-        });
+    studentsController.addStudent(student);
 
-    // try {
-    //     const studentsData = await read(filePath);
-    //     // const studentsData = JSON.parse(students);
-    //     const newStudents = studentsData.students.push(body);
-    //     await write(filePath, newStudents);
-    //     res.status(200).json(newStudents);
-    // } catch (error) {
-    //     console.log(error);
-    //     res.status(500).json({ error: 'Internal server error'})
-    // }
+    saveStudentData(res, 'Student added successfully');
 });
 
-students.put('/:fn', (req: Request, res: Response) => {
-    const student: Student = req.body;
+students.put('/:fn', async (req: Request, res: Response) => {
+    const student: IStudent = req.body;
     const { fn } = req.params;
 
-    read(filePath)
-        .then(students => JSON.parse(students))
-        .then((studentsData: StudentsData) => {
-            const students = studentsData.students.map((currentStudent) => {
-                if (currentStudent.fn === Number(fn)) {
-                    currentStudent = student;
-                }
+    studentsController.updateStudentData(Number(fn), student);
 
-                return student;
-            });
-
-            return students;
-        })
-        .then(updatedStudents => {
-            console.log(updatedStudents);
-            write(filePath, JSON.stringify({students: updatedStudents}));
-        })
-        .then(() => res.status(200).json('Student updated successfully'))
-        .catch(error => {
-            console.log(error);
-            res.status(500).json({ error: 'Internal server error'})
-        });
+    saveStudentData(res, 'Student updated successfully');
 });
 
-students.patch('/:fn/marks', (req: Request, res: Response) => {
+students.patch('/:fn/marks', async (req: Request, res: Response) => {
     // body -> {mark: 5}
     const { mark } = req.body;
     const { fn } = req.params;
 
-    read(filePath)
-        .then(students => JSON.parse(students))
-        .then((studentsData: StudentsData) => {
-            const students = studentsData.students.map((student) => {
-                if (student.fn === Number(fn)) {
-                    student.mark = mark;
-                }
+    const student: unknown = {
+        fn,
+        mark
+    };
 
-                return student;
-            });
+    studentsController.updateStudentData(Number(fn), student as IStudent);
 
-            return students;
-        })
-        .then(updatedStudents => {
-            console.log(updatedStudents);
-            write(filePath, JSON.stringify({students: updatedStudents}));
-        })
-        .then(() => res.status(200).json('Student mark updated successfully'))
-        .catch(error => {
-            console.log(error);
-            res.status(500).json({ error: 'Internal server error'})
-        });
+    saveStudentData(res, 'Student mark updated successfully');
 });
 
-students.delete('/:fn', (req: Request, res: Response) => {
+students.delete('/:fn', async (req: Request, res: Response) => {
     const { fn } = req.params;
 
-    read(filePath)
-        .then(students => JSON.parse(students))
-        .then((studentsData: StudentsData) => {
-            return studentsData.students.filter(student => student.fn !== Number(fn));
-        })
-        .then(updatedStudents => {
-            console.log(updatedStudents);
-            write(filePath, JSON.stringify({students: updatedStudents}));
-        })
-        .then(() => res.status(200).json('Student deleted successfully'))
-        .catch(error => {
-            console.log(error);
-            res.status(500).json({ error: 'Internal server error'})
-        });
+    studentsController.deleteStudentData(Number(fn));
+
+    saveStudentData(res, 'Student deleted successfully');
 });
 
 export default students;
