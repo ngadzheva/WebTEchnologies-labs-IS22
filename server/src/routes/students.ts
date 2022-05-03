@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import StudentsController from '../controllers/students-controller';
 import { IStudent } from '../interfaces/student';
+import auth from '../middlewares/auth';
 
 const students: Router = Router();
 
@@ -30,7 +31,7 @@ const saveStudentData = async (res: Response, message: string): Promise<void> =>
 
 students.use(getStudentsController);
 
-students.get('/', (req: Request, res: Response) => {
+students.get('/', auth, (req: Request, res: Response) => {
     const students = studentsController.getStudentsData();
 
     if (students) {
@@ -40,7 +41,7 @@ students.get('/', (req: Request, res: Response) => {
     }
 });
 
-students.get('/:fn', (req: Request, res: Response) => {
+students.get('/:fn', auth, (req: Request, res: Response) => {
     const { fn } = req.params;
     // { fn: 77777, name: value }
     // const asdf: { [key: string]: number | string };
@@ -54,7 +55,7 @@ students.get('/:fn', (req: Request, res: Response) => {
     }
 })
 
-students.post('/', async (req: Request, res: Response) => {
+students.post('/', auth, async (req: Request, res: Response) => {
     // {
     //     firstName: ...,
     //     lastName: ...,
@@ -69,7 +70,7 @@ students.post('/', async (req: Request, res: Response) => {
     saveStudentData(res, 'Student added successfully');
 });
 
-students.put('/:fn', async (req: Request, res: Response) => {
+students.put('/:fn', auth, async (req: Request, res: Response) => {
     const student: IStudent = req.body;
     const { fn } = req.params;
 
@@ -78,7 +79,7 @@ students.put('/:fn', async (req: Request, res: Response) => {
     saveStudentData(res, 'Student updated successfully');
 });
 
-students.patch('/:fn/marks', async (req: Request, res: Response) => {
+students.patch('/:fn/marks', auth, async (req: Request, res: Response) => {
     // body -> {mark: 5}
     const { mark } = req.body;
     const { fn } = req.params;
@@ -93,7 +94,7 @@ students.patch('/:fn/marks', async (req: Request, res: Response) => {
     saveStudentData(res, 'Student mark updated successfully');
 });
 
-students.delete('/:fn', async (req: Request, res: Response) => {
+students.delete('/:fn', auth, async (req: Request, res: Response) => {
     const { fn } = req.params;
 
     studentsController.deleteStudentData(Number(fn));

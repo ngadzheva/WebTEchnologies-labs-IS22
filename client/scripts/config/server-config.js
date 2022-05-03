@@ -3,6 +3,7 @@ const serverConfig = {
     host: 'localhost',
     port: 3001,
     routes: {
-        students: '/students'
+        students: '/students',
+        login: 'login'
     }
 };

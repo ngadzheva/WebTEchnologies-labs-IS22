@@ -9,7 +9,7 @@ const getStudentsData = () => {
         }
     };
 
-    sendRequest(url, options, showStudents, handleError);
+    sendRequest(url, options, showStudents, redirect);
 };
 
 const sendStudentData = studentData => {
