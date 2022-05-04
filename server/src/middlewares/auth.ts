@@ -5,43 +5,34 @@ import UserController from '../controllers/users-controller';
 const controller: UserController = new UserController();
 
 const auth = async (request: Request, response: Response, next: () => void): Promise<void> => {
-    const { userName, password } = request.body;
-    console.log(request.cookies)
+    // TODO: Implement
+    const { userName } = request.session;
 
-    try {
-        const user = await controller.findUser(userName);
-    
-        if (user && user.length === 1) {
-            bcrypt.compare(password, user[0].password, (error, result: boolean) => {
-                if (error) {
-                    console.error(error);
-                    response.status(400).json({error});
-                }
+    const user = await controller.findUser(userName || '');
 
-                if (result) {
+    if (user.length > 0) {
+        next();
+    } else {
+        const { remember } = request.cookies;
+
+        if (remember) {
+            const users = await controller.readUsers();
+
+            await users.users.forEach(async (user) => {
+                const userExists = await bcrypt.compare(user.userName, remember as string);
+
+                if (userExists) {
+                    request.session.userName = user.userName;
+
                     next();
-                } else {
-                    response.status(401).json({ error: 'Unauthorized' });
+                    return;
                 }
             });
+
+            response.status(401).json({ error: 'Unauthorized' });
         } else {
-            const rememberUser: string = request.cookies.remember;
-
-            if (rememberUser) {
-                const validUser = await bcrypt.compare(userName, rememberUser);
-
-                if (validUser) {
-                    next();
-                } else {
-                    response.status(401).json({ error: 'Unauthorized' });
-                }
-            } else {
-                response.status(401).json({ error: 'Session expired' });
-            }
+            response.status(401).json({ error: 'Session expired' });
         }
-    } catch (error) {
-        console.error(error);
-        response.status(500).json({ error: 'Internal server error'});
     }
 }
 

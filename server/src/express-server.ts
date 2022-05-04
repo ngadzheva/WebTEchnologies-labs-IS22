@@ -1,9 +1,10 @@
-import express from 'express';
+import express, { Request } from 'express';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 import * as uuid from 'uuid';
 import session from 'express-session';
 import memcached from 'connect-memcached';
+import Memcached from 'memcached';
 import cookieParser from 'cookie-parser';
 import router from './routes/index';
 
@@ -12,34 +13,31 @@ const app = express();
 dotenv.config();
 
 const SERVER_PORT = process.env.SERVER_PORT || 3001;
-const MEMCACHED_PORT = process.env.MEMCACHED_PORT || 11211;
 const MEMCACHED_HOST = process.env.MEMCACHED_HOST || '127.0.0.1';
-
-const MemcachedStore = memcached(session);
+const MEMCACHED_PORT = process.env.MEMCACHED_PORT || 11211;
 
 declare module 'express-session' {
     export interface SessionData {
-        user: { [key: string]: string }
+        userName: string;
     }
-};
+}
+
+const memcahedServer = new Memcached(`${MEMCACHED_HOST}:${MEMCACHED_PORT}`);
+
+const MemcachedStore = memcached(session);
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
-
 app.use(cookieParser());
 
 app.use(session({
-    genid: (request: express.Request) => {
-        console.log('Inside the session middleware');
-        console.log(request.sessionID);
+    genid: (request: Request) => {
         return uuid.v4().toString();
     },
-    secret: process.env.SESSION_SECRET as string,
-    resave: false,
-    saveUninitialized: true,
+    secret: process.env.SESSION_SECRET || '',
     store: new MemcachedStore({
         hosts: [`${MEMCACHED_HOST}:${MEMCACHED_PORT}`],
-        secret: process.env.MEMCACHED_SECRET
+        secret: process.env.MEMCACHED_SECRET || ''
     })
 }));
 

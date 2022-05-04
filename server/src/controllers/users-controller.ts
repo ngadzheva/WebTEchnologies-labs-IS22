@@ -9,19 +9,15 @@ class UserController {
 
     construct() {} 
 
-    public createUser(user: IUser): void {
-        bcrypt.hash(user.password, 10, async (error, hash: string) => {
-            if (error) {
-                return;
-            }
+    public async createUser(user: IUser): Promise<void> {
+        // TODO: Implement
+        const passwordHash = await bcrypt.hash(user.password, 10);
+        user.password = passwordHash;
 
-            user.password = hash;
+        const users = await this.readUsers();
+        users.users.push(user);
 
-            const usersObject: { [users: string]: IUser[] } = await this.readUsers();
-            usersObject.users.push(user);
-
-            await writeFile(filePath, JSON.stringify(usersObject));
-        });
+        await writeFile(filePath, JSON.stringify(users));
     }
 
     public async findUser(user: string): Promise<IUser[]> {
@@ -30,28 +26,37 @@ class UserController {
         return usersObject.users.filter((currUser: IUser) => currUser.userName === user);
     }
 
-    private async readUsers(): Promise<{ [users: string]: IUser[] }> {
+    public async readUsers(): Promise<{ [users: string]: IUser[] }> {
         const users: string = await readFile(filePath);
         const usersObject: { [users: string]: IUser[] } = JSON.parse(users);
 
         return usersObject;
     }
 
-    public validateUser(user: IUser): string[] {
-        const errors: string[] = [];
+    public isUserNameEmpty(userName: string): boolean {
+        return userName === '' || userName === undefined;
+    }
 
-        if (!user.userName) {
-            errors.push('Please input user name');
+    public isPasswordEmpty(password: string): boolean {
+        return password === '' || password === undefined;
+    }
+
+    public validateUser(user: IUser) {
+        // TODO: Implement
+        let errors = [];
+
+        if (this.isUserNameEmpty(user.userName)) {
+            errors.push('Username is required');
         } else if (user.userName.length > 20) {
-            errors.push('User name must be with maximum 20 symbols');
+            errors.push('Username must be less than 20 symbols');
         }
 
-        if (!user.password) {
-            errors.push('Please input password');
-        } else if (!user.password.match(/[a-zA-z0-9]?/)) {
+        if (this.isPasswordEmpty(user.password)) {
+            errors.push('Password is required');
+        } else if (!user.password.match(/[a-zA-Z0-9]+/)) {
             errors.push('Password must contain letters and digits');
         } else if (user.password.length < 5) {
-            errors.push('Password must be longer then 5 symbols');
+            errors.push('Password must be longer than 5 symbols');
         }
 
         return errors;

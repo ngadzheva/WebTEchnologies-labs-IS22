@@ -1,25 +1,25 @@
 import { Router, Request, Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import auth from '../middlewares/auth';
-import validateUser from '../middlewares/validateUser';
+import validateAuthUser from '../middlewares/validateAuthUser';
 
 const login: Router = Router();
 
 
-login.post('/', validateUser, auth, async (request: Request, response: Response) => {
-    const { userName, rememberMe } = request.body;
+login.post('/', validateAuthUser, async (request: Request, response: Response) => {
+    // TODO: Implement
+    let { userName, rememberMe } = request.body;
 
-    const sessionData = request.session;
-    sessionData.user = userName;
+    request.session.userName = userName;
 
     if (rememberMe) {
-        const hash = await bcrypt.hash(userName, 10);
+        const userHash = await bcrypt.hash(userName, 10);
 
-        response.cookie('remember', hash, {path: '/', maxAge: 9000, httpOnly: false});
-        response.set('Set-Cookie', `remeber=${hash}`);
+        response.cookie('remember', userHash, { path: '/', maxAge: 60 * 60 * 24 * 30, httpOnly: false });
+        response.set('Set-Cookie', `remember=${userHash}`);
     }
 
-    response.status(200).json({ message: 'Login successful' });
+    response.status(200).json({ message: 'User logged in successfully' });
 });
 
 export default login;

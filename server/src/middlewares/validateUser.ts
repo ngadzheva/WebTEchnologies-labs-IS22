@@ -4,15 +4,23 @@ import IUser from '../interfaces/user';
 
 const controller: UserController = new UserController();
 
-const validateUser = (request: Request, response: Response, next: () => void): void => {
-    const user: IUser = request.body;
+const validateUser = async (request: Request, response: Response, next: () => void): Promise<void> => {
+    // TODO: Implement
+    const { userName, password } = request.body;
 
-    const isValidUser: string[] = controller.validateUser(user);
+    const user: IUser = { userName, password };
+    const isValid = controller.validateUser(user);
 
-    if (isValidUser.length > 0) {
-        response.status(400).json({error: isValidUser});
+    if (isValid.length > 0) { 
+        response.status(400).json({ errors: isValid });
     } else {
-        next();
+        const userFound = await controller.findUser(userName);
+
+        if (userFound.length > 0) {
+            response.status(400).json({ errors: 'User already exists' });
+        } else {
+            next();
+        }
     }
 }
 
