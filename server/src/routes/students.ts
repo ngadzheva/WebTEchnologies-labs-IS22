@@ -18,21 +18,10 @@ const getStudentsController = (req: Request, res: Response, next: () => void) =>
     }
 }
 
-const saveStudentData = async (res: Response, message: string): Promise<void> => {
-    try {
-        await studentsController.writeStudentsData();
-
-        res.status(200).json(message);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal server error'})
-    }
-}
-
 students.use(getStudentsController);
 
-students.get('/', auth, (req: Request, res: Response) => {
-    const students = studentsController.getStudentsData();
+students.get('/', auth, async (req: Request, res: Response) => {
+    const students = await studentsController.getStudentsData();
 
     if (students) {
         res.status(200).json(students);
@@ -41,12 +30,12 @@ students.get('/', auth, (req: Request, res: Response) => {
     }
 });
 
-students.get('/:fn', auth, (req: Request, res: Response) => {
+students.get('/:fn', auth, async (req: Request, res: Response) => {
     const { fn } = req.params;
     // { fn: 77777, name: value }
     // const asdf: { [key: string]: number | string };
 
-    const student = studentsController.findStudentByFn(Number(fn));
+    const student = await studentsController.findStudentByFn(Number(fn));
 
     if (student) {
         res.status(200).json(student[0]);
@@ -65,18 +54,28 @@ students.post('/', auth, async (req: Request, res: Response) => {
     // }
     const student: IStudent = req.body;
 
-    studentsController.addStudent(student);
+    try {
+        await studentsController.addStudent(student);
 
-    saveStudentData(res, 'Student added successfully');
+        res.status(200).json('Student added successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error'})
+    }
 });
 
 students.put('/:fn', auth, async (req: Request, res: Response) => {
     const student: IStudent = req.body;
     const { fn } = req.params;
 
-    studentsController.updateStudentData(Number(fn), student);
+    try {
+        await studentsController.updateStudentData(Number(fn), student);
 
-    saveStudentData(res, 'Student updated successfully');
+        res.status(200).json('Student updated successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error'})
+    }
 });
 
 students.patch('/:fn/marks', auth, async (req: Request, res: Response) => {
@@ -89,17 +88,27 @@ students.patch('/:fn/marks', auth, async (req: Request, res: Response) => {
         mark
     };
 
-    studentsController.updateStudentData(Number(fn), student as IStudent);
+    try {
+        await studentsController.updateStudentData(Number(fn), student as IStudent);
 
-    saveStudentData(res, 'Student mark updated successfully');
+        res.status(200).json('Student mark updated successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error'})
+    }
 });
 
 students.delete('/:fn', auth, async (req: Request, res: Response) => {
     const { fn } = req.params;
 
-    studentsController.deleteStudentData(Number(fn));
+    try {
+        await studentsController.deleteStudentData(Number(fn));
 
-    saveStudentData(res, 'Student deleted successfully');
+        res.status(200).json('Student deleted successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error'})
+    }
 });
 
 export default students;
