@@ -1,58 +1,55 @@
 import { IStudent, IStudentsData } from "../interfaces/student";
 import { readFile, writeFile } from "../utils/file-utils";
+import { MongoClient } from 'mongodb';
 
 const filePath: string = './resources/students.json';
+const collectionName = 'students';
+
+const DB_TYPE=process.env.DB_TYPE || 'mongodb';
+const DB_HOST= process.env.DB_HOST || 'localhost';
+const DB_PORT= process.env.DB_PORT || 27017;
+const DB_NAME= process.env.DB_NAME || 'web-tech';
 
 export default class StudentsController {
     private studentsData: IStudentsData | undefined;
+    private db: any;
+    private studentsCollection: any;
 
     constructor() {
-        this.readStudentsData()
-            .then((result: string) => this.studentsData = JSON.parse(result));
-    }
+        MongoClient.connect(`${DB_TYPE}://${DB_HOST}:${DB_PORT}`, (error, client) => {
+            if (error) {
+                client && client.close();
+                
+                console.error(error);
 
-    private async readStudentsData(): Promise<string> {
-        return await readFile(filePath);
-    }
-
-    public getStudentsData(): IStudentsData | undefined {
-        return this.studentsData;
-    }
-
-    public findStudentByFn(fn: number): IStudent[] {
-        return this.studentsData ? this.studentsData.students.filter((student: IStudent) => student.fn === fn) : [];
-    }
-
-    public addStudent(student: IStudent): void {
-        this.studentsData && this.studentsData.students.push(student);
-    }
-
-    public async writeStudentsData(): Promise<void> {
-        await writeFile(filePath, JSON.stringify(this.studentsData));
-    }
-
-    public updateStudentData(fn: number, studentData: IStudent): void {
-        const students = this.studentsData ? this.studentsData.students.map((currentStudent) => {
-            if (currentStudent.fn === fn) {
-
-                // currentStudent -> {"firstName":"Maria","lastName":"Georgieva","fn":77777,"mark":6}
-                // studentData -> {fn: 77777, mark: 5}
-                // {"firstName":"Maria","lastName":"Georgieva","fn":77777,"mark":5}
-                currentStudent = {
-                    ...currentStudent,
-                    ...studentData
-                };
+                return;
             }
 
-            return currentStudent;
-        }) : [];
-
-        (students && this.studentsData) && (this.studentsData.students = students);
+            this.db = client && client.db(DB_NAME);
+            this.studentsCollection = this.db.collection(collectionName);
+        });
     }
 
-    public deleteStudentData(fn: number): void {
-        const students = this.studentsData ? this.studentsData.students.filter(student => student.fn !== fn) : [];
+    public async getStudentsData(): Promise<IStudentsData | undefined> {
+        return await this.studentsCollection.find({});
+    }
 
-        (students && this.studentsData) && (this.studentsData.students = students);
+    public async findStudentByFn(fn: number): Promise<IStudent[]> {
+        return await this.studentsCollection.find({ fn });
+    }
+
+    public async addStudent(student: IStudent): Promise<IStudent> {
+        return await this.studentsCollection.insertOne(student);
+    }
+
+    public async updateStudentData(fn: number, studentData: IStudent): Promise<IStudent> {
+        return await this.studentsCollection.updateOne(
+            { fn },
+            { $set: studentData }
+        );
+    }
+
+    public async deleteStudentData(fn: number): Promise<IStudent> {
+        return await this.studentsCollection.deleteOne({ fn });
     }
 }

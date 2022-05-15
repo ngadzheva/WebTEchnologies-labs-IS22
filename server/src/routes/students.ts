@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import StudentsController from '../controllers/students-controller';
 import { IStudent } from '../interfaces/student';
 import auth from '../middlewares/auth';
+import errorHandler from '../middlewares/error-handler';
 
 const students: Router = Router();
 
@@ -18,44 +19,56 @@ const getStudentsController = (req: Request, res: Response, next: () => void) =>
     }
 }
 
-const saveStudentData = async (res: Response, message: string): Promise<void> => {
-    try {
-        await studentsController.writeStudentsData();
+// const saveStudentData = async (res: Response, message: string): Promise<void> => {
+//     try {
+//         await studentsController.writeStudentsData();
 
-        res.status(200).json(message);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal server error'})
-    }
-}
+//         res.status(200).json(message);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: 'Internal server error'})
+//     }
+// }
 
 students.use(getStudentsController);
 
-students.get('/', auth, (req: Request, res: Response) => {
-    const students = studentsController.getStudentsData();
+students.get('/', auth, async (req: Request, res: Response) => {
+    try {
+        const students = await studentsController.getStudentsData();
 
-    if (students) {
-        res.status(200).json(students);
-    } else {
-        res.status(404).json({ error: 'No students found' });
+        if (students) {
+            res.status(200).json(students);
+        } else {
+            res.status(404).json({ error: 'No students found' });
+        }
+    } catch(error) {
+        console.error(error);
+
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 
-students.get('/:fn', auth, (req: Request, res: Response) => {
+students.get('/:fn', auth, async (req: Request, res: Response) => {
     const { fn } = req.params;
     // { fn: 77777, name: value }
     // const asdf: { [key: string]: number | string };
 
-    const student = studentsController.findStudentByFn(Number(fn));
+    try {
+        const student = await studentsController.findStudentByFn(Number(fn));
 
-    if (student) {
-        res.status(200).json(student[0]);
-    } else {
-        res.status(404).json({ error: 'Student not found' });
+        if (student) {
+            res.status(200).json(student[0]);
+        } else {
+            res.status(404).json({ error: 'Student not found' });
+        }
+    } catch(error) {
+        console.error(error);
+
+        res.status(500).json({ error: "Internal server error" });
     }
 })
 
-students.post('/', auth, async (req: Request, res: Response) => {
+students.post('/', auth, errorHandler(async (req: Request, res: Response) => {
     // {
     //     firstName: ...,
     //     lastName: ...,
@@ -65,18 +78,18 @@ students.post('/', auth, async (req: Request, res: Response) => {
     // }
     const student: IStudent = req.body;
 
-    studentsController.addStudent(student);
+    const addedStudent = await studentsController.addStudent(student);
 
-    saveStudentData(res, 'Student added successfully');
-});
+    res.status(201).json({ message: 'Student added successfully', addedStudent});
+}));
 
 students.put('/:fn', auth, async (req: Request, res: Response) => {
     const student: IStudent = req.body;
     const { fn } = req.params;
 
-    studentsController.updateStudentData(Number(fn), student);
+    const updatedStudent = await studentsController.updateStudentData(Number(fn), student);
 
-    saveStudentData(res, 'Student updated successfully');
+    res.status(200).json({ message: 'Student updated successfully', updatedStudent});
 });
 
 students.patch('/:fn/marks', auth, async (req: Request, res: Response) => {
@@ -89,17 +102,16 @@ students.patch('/:fn/marks', auth, async (req: Request, res: Response) => {
         mark
     };
 
-    studentsController.updateStudentData(Number(fn), student as IStudent);
+    const updatedStudent = await studentsController.updateStudentData(Number(fn), student as IStudent);
 
-    saveStudentData(res, 'Student mark updated successfully');
+    res.status(200).json({ message: 'Student mark updated successfully', updatedStudent});
 });
 
 students.delete('/:fn', auth, async (req: Request, res: Response) => {
     const { fn } = req.params;
 
-    studentsController.deleteStudentData(Number(fn));
-
-    saveStudentData(res, 'Student deleted successfully');
+    const deletedStudent = await studentsController.deleteStudentData(Number(fn));
+    res.status(200).json({ message: 'Student deleted successfully', deletedStudent});
 });
 
 export default students;
