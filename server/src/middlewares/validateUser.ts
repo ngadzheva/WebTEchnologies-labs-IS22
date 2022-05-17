@@ -5,7 +5,6 @@ import IUser from '../interfaces/user';
 const controller: UserController = new UserController();
 
 const validateUser = async (request: Request, response: Response, next: () => void): Promise<void> => {
-    // TODO: Implement
     const { userName, password } = request.body;
 
     const user: IUser = { userName, password };

@@ -1,55 +1,42 @@
-import { IStudent, IStudentsData } from "../interfaces/student";
-import { readFile, writeFile } from "../utils/file-utils";
-import { MongoClient } from 'mongodb';
-
-const filePath: string = './resources/students.json';
-const collectionName = 'students';
-
-const DB_TYPE=process.env.DB_TYPE || 'mongodb';
-const DB_HOST= process.env.DB_HOST || 'localhost';
-const DB_PORT= process.env.DB_PORT || 27017;
-const DB_NAME= process.env.DB_NAME || 'web-tech';
+import mongoose from "mongoose";
+import { IStudent } from "../interfaces/student";
+import Student, { StudentDocument } from "../models/student";
 
 export default class StudentsController {
-    private studentsData: IStudentsData | undefined;
-    private db: any;
-    private studentsCollection: any;
+    constructor() {}
 
-    constructor() {
-        MongoClient.connect(`${DB_TYPE}://${DB_HOST}:${DB_PORT}`, (error, client) => {
-            if (error) {
-                client && client.close();
-                
-                console.error(error);
+    public async getStudentsData(): Promise<StudentDocument[]> {
+        return await Student.find({})
+                            .sort({mark: -1, firstName: 1, lastName: 1})
+                            .limit(2)
+                            .select({firstName: true});
+    }
 
-                return;
-            }
+    public async findStudentByFn(fn: number): Promise<StudentDocument[]> {
+        return await Student.find({ fn });
+    }
 
-            this.db = client && client.db(DB_NAME);
-            this.studentsCollection = this.db.collection(collectionName);
+    public async addStudent(student: IStudent): Promise<StudentDocument> {
+        const newStudent: StudentDocument = new Student({
+            _id: new mongoose.Types.ObjectId(),
+            ...student
         });
+
+        return await newStudent.save();
     }
 
-    public async getStudentsData(): Promise<IStudentsData | undefined> {
-        return await this.studentsCollection.find({});
-    }
-
-    public async findStudentByFn(fn: number): Promise<IStudent[]> {
-        return await this.studentsCollection.find({ fn });
-    }
-
-    public async addStudent(student: IStudent): Promise<IStudent> {
-        return await this.studentsCollection.insertOne(student);
-    }
-
-    public async updateStudentData(fn: number, studentData: IStudent): Promise<IStudent> {
-        return await this.studentsCollection.updateOne(
+    public async updateStudentData(fn: number, studentData: IStudent): Promise<boolean> {
+        const res = await Student.updateOne(
             { fn },
-            { $set: studentData }
+            { ...studentData }
         );
+
+        return res.acknowledged;
     }
 
-    public async deleteStudentData(fn: number): Promise<IStudent> {
-        return await this.studentsCollection.deleteOne({ fn });
+    public async deleteStudentData(fn: number): Promise<number> {
+        const res = await Student.deleteOne({ fn });
+        
+        return res.deletedCount;
     }
 }

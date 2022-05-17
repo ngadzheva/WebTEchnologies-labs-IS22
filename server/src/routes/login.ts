@@ -1,13 +1,11 @@
 import { Router, Request, Response } from 'express';
 import * as bcrypt from 'bcrypt';
-import auth from '../middlewares/auth';
 import validateAuthUser from '../middlewares/validateAuthUser';
 
 const login: Router = Router();
 
 
 login.post('/', validateAuthUser, async (request: Request, response: Response) => {
-    // TODO: Implement
     let { userName, rememberMe } = request.body;
 
     request.session.userName = userName;

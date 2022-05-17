@@ -1,12 +1,10 @@
 import { Request, Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import UserController from '../controllers/users-controller';
-import IUser from '../interfaces/user';
 
 const controller: UserController = new UserController();
 
 const validateAuthUser = async (request: Request, response: Response, next: () => void): Promise<void> => {
-    // TODO: Implement
     let { userName, password } = request.body;
 
     if (controller.isUserNameEmpty(userName) || controller.isPasswordEmpty(password)) {

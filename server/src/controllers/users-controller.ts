@@ -1,36 +1,31 @@
 import * as bcrypt from 'bcrypt';
+import * as mongoose from 'mongoose';
 import IUser from '../interfaces/user';
-import { readFile, writeFile } from '../utils/file-utils';
-
-const filePath: string = './resources/users.json';
+import User, { UserDocument } from '../models/user';
 
 class UserController {
-    private user: IUser | undefined;
-
     construct() {} 
 
     public async createUser(user: IUser): Promise<void> {
-        // TODO: Implement
         const passwordHash = await bcrypt.hash(user.password, 10);
         user.password = passwordHash;
 
-        const users = await this.readUsers();
-        users.users.push(user);
+        const newUser = new User({
+            _id: new mongoose.Types.ObjectId(),
+            username: user.userName,
+            password: user.password, 
+            email: user.email
+        });
 
-        await writeFile(filePath, JSON.stringify(users));
+        await newUser.save();
     }
 
-    public async findUser(user: string): Promise<IUser[]> {
-        const usersObject: { [users: string]: IUser[] } = await this.readUsers();
-
-        return usersObject.users.filter((currUser: IUser) => currUser.userName === user);
+    public async getUsers(): Promise<UserDocument[]> {
+        return await User.find({});
     }
 
-    public async readUsers(): Promise<{ [users: string]: IUser[] }> {
-        const users: string = await readFile(filePath);
-        const usersObject: { [users: string]: IUser[] } = JSON.parse(users);
-
-        return usersObject;
+    public async findUser(user: string): Promise<UserDocument[]> {
+        return await User.find({ userName: user });
     }
 
     public isUserNameEmpty(userName: string): boolean {
@@ -42,7 +37,6 @@ class UserController {
     }
 
     public validateUser(user: IUser) {
-        // TODO: Implement
         let errors = [];
 
         if (this.isUserNameEmpty(user.userName)) {

@@ -5,7 +5,6 @@ import UserController from '../controllers/users-controller';
 const controller: UserController = new UserController();
 
 const auth = async (request: Request, response: Response, next: () => void): Promise<void> => {
-    // TODO: Implement
     const { userName } = request.session;
 
     const user = await controller.findUser(userName || '');
@@ -16,9 +15,9 @@ const auth = async (request: Request, response: Response, next: () => void): Pro
         const { remember } = request.cookies;
 
         if (remember) {
-            const users = await controller.readUsers();
+            const users = await controller.getUsers();
 
-            await users.users.forEach(async (user) => {
+            await users.forEach(async (user) => {
                 const userExists = await bcrypt.compare(user.userName, remember as string);
 
                 if (userExists) {

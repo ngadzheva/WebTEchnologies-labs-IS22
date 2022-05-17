@@ -7,6 +7,7 @@ import memcached from 'connect-memcached';
 import Memcached from 'memcached';
 import cookieParser from 'cookie-parser';
 import router from './routes/index';
+import connectDb from './db/index';
 
 const app = express();
 
@@ -43,4 +44,12 @@ app.use(session({
 
 app.use(router);
 
-app.listen(SERVER_PORT, () => console.log(`Server is listening on port ${SERVER_PORT}`));
+connectDb()
+    .then(() => {
+        console.log('Database connection successful');
+
+        app.listen(SERVER_PORT, () => {
+            console.log(`Server is listening on port ${SERVER_PORT}`);
+        });
+    })
+    .catch((error: any) => console.error(`Database connection error: ${error}`));
