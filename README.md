@@ -11,6 +11,10 @@
   - Install NodeJs on Windows: https://nodejs.org/en/
  - How to setup Express
   - ExpressJs documentation: https://expressjs.com/en/starter/installing.html
+-  How to setup MongoDB
+   - Local setup: https://docs.mongodb.com/guides/server/install/
+   - Cloud setup: https://docs.atlas.mongodb.com/
+ - How to setup Mongoose: https://mongoosejs.com/docs/index.html
 **_Note:_** NPM comes with NodeJs
 
 
@@ -36,6 +40,8 @@
 - [Learn Express Tutorial](https://www.codecademy.com/learn/learn-express)
 - [NodeJs Documentation](https://nodejs.org/en/docs/)
 - [Express Guide](https://expressjs.com/en/guide/routing.html)
+- [MongoDB Documentation](https://docs.mongodb.com/guides/)
+- [Mongoose Documentation](https://mongoosejs.com/docs/guides.html)
 
 ## Course Project
 ### Iterations
