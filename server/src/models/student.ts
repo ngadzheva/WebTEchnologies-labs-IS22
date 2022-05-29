@@ -1,35 +1,36 @@
-import { Document, Model, Schema, model } from 'mongoose';
-import { IStudent } from '../interfaces/student';
+import { model, Schema, Document, Model } from "mongoose";
+import { IStudent } from "../interfaces/student";
 
 export interface StudentDocument extends IStudent, Document {
+
 }
 
 export interface StudentModel extends Model<StudentDocument> {
+
 }
 
 const studentSchema = new Schema({
     firstName: {
         type: String,
-        required: [true, 'First Name is required field.'],
-        maxlength:  [20, 'First Name must be less than 20 characters.']
+        required: [true, 'First name is required'],
+        maxLength: [20, 'First name must be less than 20 symbols']
     },
     lastName: {
         type: String,
-        required: [true, 'Last Name is required field.'],
-        maxlength:  [20, 'Last Name must be less than 20 characters.']
+        required: [true, 'Last name is required'],
+        maxLength: [30, 'Last name must be less than 30 symbols']
     },
     fn: {
-        type: String,
-        required: [true, 'Faculty Number is required field.'],
-        validate: {
-            validator: (value: string) => /\d{5}/.test(value),
-            message: 'Faculty Number must be 5-digits number.'
-        }
+        type: Number,
+        required: [true, 'Faculty number is required'],
+        min: [70000, 'Faculty number must be greater than or equal to 70000'],
+        max: [79999, 'Faculty number must be less than or equal to 79999']
     },
     mark: {
         type: Number,
-        min: [2, 'Mark must be at least 2.'],
-        max: [6, 'Mark must be not longer than 6.']
+        required: false,
+        min: [2, 'Mark must be greater than or equal than 2'],
+        max: [6, 'Mark must be less than or equal than 6'],
     }
 });
 

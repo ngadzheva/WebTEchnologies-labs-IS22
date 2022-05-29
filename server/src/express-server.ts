@@ -1,4 +1,4 @@
-import express, { Request } from 'express';
+import express from 'express';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 import * as uuid from 'uuid';
@@ -32,14 +32,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(session({
-    genid: (request: Request) => {
-        return uuid.v4().toString();
-    },
     secret: process.env.SESSION_SECRET || '',
-    store: new MemcachedStore({
-        hosts: [`${MEMCACHED_HOST}:${MEMCACHED_PORT}`],
-        secret: process.env.MEMCACHED_SECRET || ''
-    })
+    saveUninitialized: false,
+    resave: false
 }));
 
 app.use(router);

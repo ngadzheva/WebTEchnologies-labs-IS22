@@ -4,7 +4,6 @@ import validateAuthUser from '../middlewares/validateAuthUser';
 
 const login: Router = Router();
 
-
 login.post('/', validateAuthUser, async (request: Request, response: Response) => {
     let { userName, rememberMe } = request.body;
 

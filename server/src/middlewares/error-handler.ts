@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Request, Response } from 'express';
 
 const errorHandler = (callback: (req: Request, res: Response, next: () => void) => void) => {
     return async (req: Request, res: Response, next: () => void) => {
