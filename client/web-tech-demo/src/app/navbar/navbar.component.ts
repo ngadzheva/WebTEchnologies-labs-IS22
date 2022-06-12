@@ -34,7 +34,7 @@ export class NavbarComponent implements OnInit, DoCheck, OnDestroy {
 
   logOut() {
     this.logoutSubscription = this.authService.logOut().subscribe(response => {
-      if(response.success) {
+      if(response['success']) {
         this.cookieService.delete('Log-Cookie');
         this.cookieService.delete('Role-Cookie');
         this.router.navigateByUrl('/');

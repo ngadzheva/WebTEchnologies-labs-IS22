@@ -29,12 +29,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(){
-    this.loginSubscription = this.authService.login(this.user.userName, this.user.password).subscribe(response => {
-      if(response.success){
+    this.loginSubscription = this.authService.login(this.user['userName'], this.user['password']).subscribe(response => {
+      if(response['success']){
         this.errorMessage = '';
         this.isSubmitted = true;
-        this.cookieService.set('Log-Cookie', response.token);
-        this.cookieService.set('Role-Cookie', response.userRole);
+        this.cookieService.set('Log-Cookie', response['token']);
+        this.cookieService.set('Role-Cookie', response['userRole']);
         this.router.navigateByUrl('/user/info');
       } 
     }, error => {
